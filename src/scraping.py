@@ -142,11 +142,18 @@ if __name__ == "__main__":
 
     e_AM, w_AM = accessMonitorAnalisis(driver, address)
 
-    print(json.dumps(e_AC))
-    print(json.dumps(lp_AC))
-    print(json.dumps(pp_AC))
-    print(json.dumps(e_AM))
-    print(json.dumps(w_AM))
+    resJson = {}
+
+    resJson['AChecker_errors'] = e_AC
+    resJson['AChecker_likely_problems'] = lp_AC
+    resJson['AChecker_potential_problems'] = pp_AC
+
+    resJson['AccessMonitor_errors'] = e_AM
+    resJson['AccessMonitor_warnings'] = w_AM
+
+    print(json.dumps(resJson,indent=4))
 
     sys.stdout.flush()
+
+    exit()
 

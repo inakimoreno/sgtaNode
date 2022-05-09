@@ -1,0 +1,6 @@
+{
+    "scripts" : 
+    {
+        "python_scraping" : "./src/scraping.py"
+    }
+}
