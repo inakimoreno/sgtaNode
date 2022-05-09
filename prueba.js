@@ -1,13 +1,16 @@
 const pa11y = require('pa11y');
 const fs = require('fs')
 const spawn = require("child_process").spawn;
+const express = require('express')
+const app = express()
+
 let webpage
 let map = new Map()
 const readline = require('readline').createInterface({
     input: process.stdin,
     output: process.stdout
 });
-  
+
 readline.question('Choose a webpage: ', web => {
     webpage = web
     readline.close();
@@ -23,12 +26,18 @@ readline.question('Choose a webpage: ', web => {
                 map[wholeCode]=[context]
             }
         });
+        var jsData = map
+        var pythonData
         const pythonProcess = spawn('python',["main.py", web]);
         pythonProcess.stdout.on('data', (data) => {
-            console.log(data.toString())
+            pythonData = data
         });
-        fs.writeFile('output.txt',JSON.stringify(map),(err)=>{
-            if (err) throw err
+        app.get('/analyze/:site', function (req, res) {
+            req.params
+            res.setHeader('Content-Type','application/json')
+            res.send(JSON.stringify(jsData)+pythonData)
         })
+        
+        app.listen(3000)
     });
 });

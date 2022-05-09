@@ -17,6 +17,7 @@
   },
   "homepage": "https://github.com/inakimoreno/sgtaNode#readme",
   "dependencies": {
+    "express": "^4.18.1",
     "pa11y": "^6.2.3"
   }
 }
