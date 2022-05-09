@@ -1,0 +1,22 @@
+{
+  "name": "sgtanode",
+  "version": "1.0.0",
+  "description": "",
+  "main": "prueba.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/inakimoreno/sgtaNode.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/inakimoreno/sgtaNode/issues"
+  },
+  "homepage": "https://github.com/inakimoreno/sgtaNode#readme",
+  "dependencies": {
+    "pa11y": "^6.2.3"
+  }
+}
