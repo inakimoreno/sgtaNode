@@ -9,11 +9,6 @@ const readline = require('readline').createInterface({
 });
   
 readline.question('Choose a webpage: ', web => {
-    const pythonProcess = spawn('python',["C:/Users/asus/Desktop/SGTA_Scraping/main.py", web]);
-    pythonProcess.stdout.on('data', (data) => {
-        // Do something with the data returned from python script
-        console.log(data.toString())
-    });
     webpage = web
     readline.close();
     pa11y(webpage).then((results) => {
@@ -21,14 +16,16 @@ readline.question('Choose a webpage: ', web => {
             principle = element.code.replace('Principle','').split('.')[1]+'.'
             code = element.code.split('_')[1]
             wholeCode = principle+code
-            console.log(principle)
             context = element.context
-            console.log(context)
             if(map[wholeCode]!=null){
                 map[wholeCode].push(context)
             }else{
                 map[wholeCode]=[context]
             }
+        });
+        const pythonProcess = spawn('python',["main.py", web]);
+        pythonProcess.stdout.on('data', (data) => {
+            console.log(data.toString())
         });
         fs.writeFile('output.txt',JSON.stringify(map),(err)=>{
             if (err) throw err
