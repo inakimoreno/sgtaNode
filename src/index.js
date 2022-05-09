@@ -18,21 +18,25 @@ app.get('/analyze/:site/', function (req, res) {
             res.json(analysis)
         })  
     })
-    
+
     pa11y(webpage).then((results) => {
-        var localData = new Map()
-        results.issues.forEach(element => {
-            principle = element.code.replace('Principle','').split('.')[1]+'.'
-            code = element.code.split('_')[1]
-            wholeCode = principle+code
-            context = element.context
-            if(localData[wholeCode]!=null){
-                localData[wholeCode].push(context)
-            }else{
-                localData[wholeCode]=[context]
-            }
+        fs.readFile('./criteria.json',(err, data)=>{
+            var criteria = JSON.parse(data)
+            console.log(criteria)
+            var localData = new Map()
+            results.issues.forEach(element => {
+                principle = element.code.replace('Principle','').split('.')[1]+'.'
+                code = element.code.split('_')[1]
+                wholeCode = principle+code
+                context = element.context
+                if(localData[wholeCode+' '+criteria[wholeCode]]!=null){
+                    localData[wholeCode+' '+criteria[wholeCode]].push(context)
+                }else{
+                    localData[wholeCode+' '+criteria[wholeCode]]=[context]
+                }
+            });
+            analysis['pa11y'] = localData
         });
-        analysis['pa11y'] = localData
     });
     
     

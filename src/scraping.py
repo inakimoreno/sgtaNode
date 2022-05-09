@@ -94,26 +94,29 @@ def accessMonitorAnalisis(driver, address):
 
     errors = driver.find_elements(by=By.CLASS_NAME, value="rowerr")
     errors_PC = {}
-    for er in range(0,len(errors)):
-        locations=getElementLocationPC(driver, driver.find_elements(by=By.CLASS_NAME, value="rowerr")[er])
-        error = driver.find_elements(by=By.CLASS_NAME, value="rowerr")[er]
-        error.find_element(by=By.XPATH, value="./following-sibling::td").find_element(by=By.TAG_NAME, value="button").click()
-        criterias = error.find_element(by=By.XPATH, value="./following-sibling::td").find_elements(by=By.TAG_NAME, value="li")
-        for cr in criterias:
-            cr_p = cr.text[::-1].split(" ", 5)[5][::-1].replace("Success criteria ", "").replace("Level ", "")
-            errors_PC[cr_p.replace(" ", f" {criteria_dic[ cr_p.split()[0]]} ")] = locations if locations else []
 
-    warnings = driver.find_elements(by=By.CLASS_NAME, value="rowwar")
-    warnings_PC = {}
+    with open('./criteria.json', 'r') as crit:
+        criteriaJSON = json.load(crit)
+        for er in range(0,len(errors)):
+            locations=getElementLocationPC(driver, driver.find_elements(by=By.CLASS_NAME, value="rowerr")[er])
+            error = driver.find_elements(by=By.CLASS_NAME, value="rowerr")[er]
+            error.find_element(by=By.XPATH, value="./following-sibling::td").find_element(by=By.TAG_NAME, value="button").click()
+            criterias = error.find_element(by=By.XPATH, value="./following-sibling::td").find_elements(by=By.TAG_NAME, value="li")
+            for cr in criterias:
+                cr_p = cr.text[::-1].split(" ", 5)[5][::-1].replace("Success criteria ", "").replace("Level ", "")
+                errors_PC[cr_p.replace(" ", f" {criteriaJSON[ cr_p.split()[0]]} ")] = locations if locations else []
 
-    for war in range(0,len(warnings)):
-        locations=getElementLocationPC(driver, driver.find_elements(by=By.CLASS_NAME, value="rowwar")[war])
-        warning = driver.find_elements(by=By.CLASS_NAME, value="rowwar")[war]
-        warning.find_element(by=By.XPATH, value="./following-sibling::td").find_element(by=By.TAG_NAME, value="button").click()
-        criterias = warning.find_element(by=By.XPATH, value="./following-sibling::td").find_elements(by=By.TAG_NAME, value="li")
-        for cr in criterias:
-            cr_p = cr.text[::-1].split(" ", 5)[5][::-1].replace("Success criteria ", "").replace("Level ", "")
-            warnings_PC[cr_p.replace(" ", f" {criteria_dic[ cr_p.split()[0]]} ")] = locations if locations else []
+        warnings = driver.find_elements(by=By.CLASS_NAME, value="rowwar")
+        warnings_PC = {}
+
+        for war in range(0,len(warnings)):
+            locations=getElementLocationPC(driver, driver.find_elements(by=By.CLASS_NAME, value="rowwar")[war])
+            warning = driver.find_elements(by=By.CLASS_NAME, value="rowwar")[war]
+            warning.find_element(by=By.XPATH, value="./following-sibling::td").find_element(by=By.TAG_NAME, value="button").click()
+            criterias = warning.find_element(by=By.XPATH, value="./following-sibling::td").find_elements(by=By.TAG_NAME, value="li")
+            for cr in criterias:
+                cr_p = cr.text[::-1].split(" ", 5)[5][::-1].replace("Success criteria ", "").replace("Level ", "")
+                warnings_PC[cr_p.replace(" ", f" {criteriaJSON[ cr_p.split()[0]]} ")] = locations if locations else []
     
     return errors_PC, warnings_PC
 
