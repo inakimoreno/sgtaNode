@@ -3,6 +3,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 import sys
+import json
 
 aChecker = "https://achecker.achecks.ca/checker/index.php"
 accessMonitor = "https://accessmonitor.acessibilidade.gov.pt/"
@@ -141,11 +142,11 @@ if __name__ == "__main__":
 
     e_AM, w_AM = accessMonitorAnalisis(driver, address)
 
-    print(e_AC)
-    print(lp_AC)
-    print(pp_AC)
-    print(e_AM)
-    print(w_AM)
+    print(json.dumps(e_AC))
+    print(json.dumps(lp_AC))
+    print(json.dumps(pp_AC))
+    print(json.dumps(e_AM))
+    print(json.dumps(w_AM))
 
     sys.stdout.flush()
 
