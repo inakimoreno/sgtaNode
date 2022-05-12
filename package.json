@@ -17,7 +17,9 @@
   },
   "homepage": "https://github.com/inakimoreno/sgtaNode#readme",
   "dependencies": {
+    "@axe-core/webdriverjs": "^4.4.2",
     "express": "^4.18.1",
-    "pa11y": "^6.2.3"
+    "pa11y": "^6.2.3",
+    "selenium-webdriver": "^4.1.2"
   }
 }

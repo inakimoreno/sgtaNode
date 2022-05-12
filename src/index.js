@@ -3,15 +3,28 @@ const fs = require('fs')
 const spawn = require("child_process").spawn;
 const express = require('express')
 const app = express()
+const AxeBuilder = require('@axe-core/webdriverjs');
+const WebDriver = require('selenium-webdriver');
+
 app.set('json spaces', 2)
+const driver = new WebDriver.Builder().forBrowser('chrome').build()
 
 app.get('/analyze/:site/', function (req, res) {
     res.setHeader('Content-Type','application/json')
-    var analysis = {'pa11y':{},'python':{}}
-    var webpage = req.params['site']
-    
+    let analysis = {'pa11y':{},'python':{}}
+    let webpage = req.params['site']
+
+    driver.get(`https://${webpage}`).then(() => {
+        new AxeBuilder(driver).analyze((err, results) => {
+            if (err) {
+                // Handle error somehow
+            }
+            console.log(results.violations);
+        });
+    });
+
     fs.readFile('./config.json',(err, data)=>{
-        var script = JSON.parse(data)['scripts']['python_scraping']
+        let script = JSON.parse(data)['scripts']['python_scraping']
         const pythonProcess = spawn('python',[script, webpage]);
         pythonProcess.stdout.on('data', (data) => {
             analysis['python'] = JSON.parse(data.toString())
@@ -21,9 +34,9 @@ app.get('/analyze/:site/', function (req, res) {
 
     pa11y(webpage).then((results) => {
         fs.readFile('./criteria.json',(err, data)=>{
-            var criteria = JSON.parse(data)
-            console.log(criteria)
-            var localData = new Map()
+            let criteria = JSON.parse(data)
+            // console.log(criteria)
+            let localData = new Map()
             results.issues.forEach(element => {
                 principle = element.code.replace('Principle','').split('.')[1]+'.'
                 code = element.code.split('_')[1]
