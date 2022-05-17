@@ -11,15 +11,43 @@ const driver = new WebDriver.Builder().forBrowser('chrome').build()
 
 app.get('/analyze/:site/', function (req, res) {
     res.setHeader('Content-Type','application/json')
-    let analysis = {'pa11y':{},'python':{}}
+    let analysis = {'pa11y':{},'axe':{},'python':{}}
     let webpage = req.params['site']
 
     driver.get(`https://${webpage}`).then(() => {
-        new AxeBuilder(driver).analyze((err, results) => {
-            if (err) {
-                // Handle error somehow
+        new AxeBuilder(driver).options({
+            runOnly: {
+                type: 'tag',
+                values: ['wcag2a','wcag2aa','wcag2aaa']
             }
-            console.log(results.violations);
+        }).analyze((err, results) => {
+            fs.readFile('./criteria.json',(err, data)=>{
+                let criteria = JSON.parse(data)
+                let axe_violations = results.violations;
+                let axe_local_vioaltions = new Map();
+
+                axe_violations.forEach(violation => {
+                    let tags = violation['tags'].filter(value => /^wcag[0-9]{2,3}/.test(value));
+                    let nodes = violation['nodes'];
+                    let html = [];
+                    nodes.forEach(node => {
+                        html.push(node['html'])
+                    });
+                    console.log(tags);
+                    console.log(html);
+                    tags.forEach((element,index) => {
+                        nodes.forEach(node => {
+                            let num = element.substring(4).split('').join('.');
+                            if(axe_local_vioaltions[num + ' ' +criteria[num]]!=null){
+                                axe_local_vioaltions[num + ' ' +criteria[num]].push(node['html']);
+                            }else{
+                                axe_local_vioaltions[num + ' ' +criteria[num]]=[node['html']];
+                            }
+                        });
+                    });
+                });
+                analysis['axe'] = axe_local_vioaltions
+            });
         });
     });
 
