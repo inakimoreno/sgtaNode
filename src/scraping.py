@@ -4,6 +4,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 import sys
 import json
+import time, threading, queue
 
 aChecker = "https://achecker.achecks.ca/checker/index.php"
 accessMonitor = "https://accessmonitor.acessibilidade.gov.pt/"
@@ -21,7 +22,7 @@ def configDriver():
     options = webdriver.ChromeOptions()
     options.add_argument('headless')
     options.add_argument('--window-size=1920,1080')
-    driver = webdriver.Chrome(options=options)
+    driver = webdriver.Chrome("chromedriver.exe",options=options)
     return driver
 
 def setSiteToAnalize():
@@ -32,7 +33,8 @@ def setSiteToAnalize():
     return address
     
 
-def aCheckerAnalisis(driver, address):
+def aCheckerAnalisis(address, queue):
+    driver = configDriver()
     driver.get(aChecker)
     driver.find_element(by=By.ID,value="checkuri").send_keys(address)
     driver.find_element(by=By.ID,value="validate_uri").click()
@@ -69,9 +71,10 @@ def aCheckerAnalisis(driver, address):
             else:
                 potential_problems_AC[i.find_element(by=By.XPATH, value="./preceding::h4[1]").text.split(' ',2)[2]] = [i.find_element(by=By.TAG_NAME, value="code").text]
 
-    return errors_AC, likely_problems_AC, potential_problems_AC
+    queue.put((errors_AC, likely_problems_AC, potential_problems_AC))
 
-def accessMonitorAnalisis(driver, address):
+def accessMonitorAnalisis(address, queue):
+    driver = configDriver()
     driver.get(accessMonitor)
     driver.find_element(by=By.XPATH, value='//button[@lang="en"]').click()
     driver.find_element(by=By.ID, value="url").send_keys(address)
@@ -105,7 +108,7 @@ def accessMonitorAnalisis(driver, address):
                 cr_p = cr.text[::-1].split(" ", 5)[5][::-1].replace("Success criteria ", "").replace("Level ", "")
                 warnings_PC[cr_p.replace(" ", f" {criteriaJSON[ cr_p.split()[0]]} ")] = locations if locations else []
     
-    return errors_PC, warnings_PC
+    queue.put((errors_PC, warnings_PC))
 
 def getElementLocationPC(driver, elem):
     locations = []
@@ -119,16 +122,23 @@ def getElementLocationPC(driver, elem):
 
 
 if __name__ == "__main__":
+    start_time = time.time()
 
     address = sys.argv[1]
 
-    driver = configDriver()
-
     # address = setSiteToAnalize()
+    aCheckerQueue = queue.Queue()
+    accessMonitorQueue = queue.Queue()
 
-    e_AC, lp_AC, pp_AC = aCheckerAnalisis(driver, address)
+    t1 = threading.Thread(target=aCheckerAnalisis, args=(address,aCheckerQueue))
+    t2 = threading.Thread(target=accessMonitorAnalisis, args=(address,accessMonitorQueue))
+    t1.start()
+    t2.start()
 
-    e_AM, w_AM = accessMonitorAnalisis(driver, address)
+    t1.join()
+    e_AC, lp_AC, pp_AC = aCheckerQueue.get()
+    t2.join()
+    e_AM, w_AM = accessMonitorQueue.get()
 
     resJson = {}
 
@@ -140,7 +150,7 @@ if __name__ == "__main__":
     resJson['AccessMonitor_warnings'] = w_AM
 
     print(json.dumps(resJson,indent=4))
-
     sys.stdout.flush()
+    print(time.time()-start_time)
 
     exit()
